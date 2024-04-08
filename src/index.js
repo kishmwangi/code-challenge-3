@@ -1,3 +1,6 @@
+let currentMoive = null;
+let movieData = [];
+
 document.addEventListener('DOMContentLoaded', function() {
     // Function to make GET request
     function getRequest(url, callback) {
@@ -9,21 +12,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to display movie details
     function displayMovieDetails(movie) {
-        let movieDetailsDiv = document.getElementById('movieDetails');
-        let availableTickets = movie.capacity - movie.tickets_sold;
-        let buyButton = `<button onclick="buyTicket(${movie.id}, ${availableTickets})" ${availableTickets === 0 ? 'disabled' : ''}>${availableTickets === 0 ? 'Sold Out' : 'Buy Ticket'}</button>`;
-        movieDetailsDiv.innerHTML = `
-            <div>
-                <img src="${movie.poster}" alt="${movie.title}" width="200">
+        movieImage.innerHTML = `<img src="${movie.poster}" alt="${movie.title} Image" width="300">`;
+        movieDescription.innerHTML = `
+                
                 <h2>${movie.title}</h2>
                 <p>Runtime: ${movie.runtime} minutes</p>
                 <p>Showtime: ${movie.showtime}</p>
-                <p>Available Tickets: ${availableTickets}</p>
-                ${buyButton}
-            </div>
+                <p>Avail<img src="${movie.poster}" alt="${movie.title} Image" width="300">able Tickets: ${availableTickets}</p>
         `;
     }
-
     // Function to display movie list
     function displayMovieList(movies) {
         let filmsList = document.getElementById('films');
@@ -32,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let listItem = document.createElement('li');
             listItem.textContent = movie.title;
             listItem.addEventListener('click', function() {
-                getRequest(`/films/${movie.id}`, function(movie) {
+                getRequest(`http://localhost:3000/films/${movie.id}`, function(movie) {
                     displayMovieDetails(movie);
                 });
             });
@@ -40,10 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Function to handle buying ticket
-    function buyTicket(movieId, availableTickets) {
+    
+
+     // Function to handle buying ticket
+     function buyTicket(movieId, availableTickets) {
         if (availableTickets > 0) {
-            fetch(`/films/${movieId}`, {
+            fetch(`http://localhost:3000/films/${movieId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -62,9 +61,28 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Sorry, this movie is sold out!');
         }
     }
+   // Function to handle buying a ticket for a movie
+function buyTicket(movieId) {
+    fetch(`http://localhost:3000/films/${movieId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tickets_sold: 1 }) // Assuming buying 1 ticket
+    })
+      .then(response => response.json())
+      .then(data => {
+        // Update UI to reflect the purchase
+        const availableTickets = data.capacity - data.tickets_sold;
+        document.getElementById('ticket-num').textContent = `${availableTickets} remaining tickets`;
+        alert('Ticket purchased successfully.');
+      })
+      .catch(error => console.error('Error buying ticket:', error));
+  }
+  
 
     // Get movie details and list of movies on page load
-    getRequest('/films', function(movies) {
+    getRequest('http://localhost:3000/films', function(movies) {
         displayMovieList(movies);
     });
 });
