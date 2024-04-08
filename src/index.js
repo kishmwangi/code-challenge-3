@@ -84,5 +84,5 @@ function buyTicket(movieId) {
     // Get movie details and list of movies on page load
     getRequest('http://localhost:3000/films', function(movies) {
         displayMovieList(movies);
-    });
+    }); 
 });
